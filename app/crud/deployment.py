@@ -7,10 +7,10 @@ from app.models.Cluster import Cluster
 from app.models.Deployment import Deployment
 from app.schemas.deployment import DeploymentCreate
 from datetime import datetime
-from app.crud.org import get_user_org_membership
-from app.models.Role import RoleEnum
 from app.models.UserOrganizations import UserOrganization
 from sqlalchemy import and_
+from app.core.redis_client import push_deployment_to_queue
+from app.models.Deployment import DeploymentStatus
 
 async def create_deployment(
     db: AsyncSession,
@@ -29,7 +29,7 @@ async def create_deployment(
         cluster.available_gpu < data.required_gpu):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Insufficient cluster resources"
+            detail=f"Insufficient cluster resources. Required: CPU={data.required_cpu}, RAM={data.required_ram}, GPU={data.required_gpu}. Available: CPU={cluster.available_cpu}/{cluster.total_cpu}, RAM={cluster.available_ram}/{cluster.total_ram}, GPU={cluster.available_gpu}/{cluster.total_gpu}."
         )
 
     cluster.available_cpu -= data.required_cpu
@@ -50,6 +50,14 @@ async def create_deployment(
     db.add(dep)
     await db.commit()
     await db.refresh(dep)
+    push_deployment_to_queue({
+    "deployment_id": dep.id,
+    "priority": dep.priority.value,
+    "required_cpu": dep.required_cpu,
+    "required_ram": dep.required_ram,
+    "required_gpu": dep.required_gpu,
+    "cluster_id": dep.cluster_id
+    })
     return dep
 
 async def list_deployments(
@@ -114,3 +122,25 @@ async def delete_deployment(
 
     await db.delete(dep)
     await db.commit()
+
+async def get_deployment_by_id_for_scheduling(
+    db: AsyncSession,
+    deployment_id: int
+) -> Deployment | None:
+    """Fetches a deployment by ID for scheduling purposes (no user/org checks)."""
+    result = await db.execute(
+        select(Deployment).where(Deployment.id == deployment_id)
+    )
+    return result.scalars().first()
+
+async def list_running_deployments_for_cluster(
+    db: AsyncSession,
+    cluster_id: int
+) -> list[Deployment]:
+    """Lists running deployments for a specific cluster."""
+    result = await db.execute(
+        select(Deployment)
+        .where(Deployment.cluster_id == cluster_id)
+        .where(Deployment.status == DeploymentStatus.RUNNING)
+    )
+    return result.scalars().all()
