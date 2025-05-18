@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 import enum
+from .cluster import ClusterRead # Import ClusterRead from the new cluster schema file
 
 class PriorityLevelEnum(str, enum.Enum):
     HIGH = "HIGH"
@@ -12,28 +13,6 @@ class DeploymentStatusEnum(str, enum.Enum):
     RUNNING = "RUNNING"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
-
-# --- Cluster Schemas ---
-class ClusterBase(BaseModel):
-    name: str
-    total_cpu: float
-    total_ram: int
-    total_gpu: int
-
-class ClusterCreate(ClusterBase):
-    organization_id: int
-
-class ClusterRead(ClusterBase):
-    id: int
-    available_cpu: float
-    available_ram: int
-    available_gpu: int
-    owner_id: int
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
 
 # --- Deployment Schemas ---
 class DeploymentBase(BaseModel):
@@ -57,4 +36,7 @@ class DeploymentRead(DeploymentBase):
     finished_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        orm_mode = True 
+
+class DeploymentDeleteRequest(BaseModel):
+    cluster_id: int

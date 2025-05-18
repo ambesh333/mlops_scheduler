@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import AsyncSessionLocal
 from app.core.jwt import auth
-from app.schemas.cluster_deploy import ClusterCreate, ClusterRead
+from app.schemas.cluster import ClusterCreate, ClusterRead
 from app.crud.cluster import (
     create_cluster,
     list_clusters,

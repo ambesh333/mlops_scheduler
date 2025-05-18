@@ -4,11 +4,13 @@ from app.core.database import engine
 from sqlalchemy import text
 from app.api.routes import org
 from app.api.routes import cluster
+from app.api.routes import deployment
 
 app = FastAPI()
 app.include_router(user.router, prefix="/api/users", tags=["Users"])
 app.include_router(org.router, prefix="/api/orgs", tags=["Orgs"])
 app.include_router(cluster.router, prefix="/api/clusters", tags=["Clusters"])
+app.include_router(deployment.router, prefix="/api/deployments", tags=["Deployments"])
 
 @app.get("/")
 def read_root():

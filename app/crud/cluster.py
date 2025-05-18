@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from fastapi import HTTPException
 from app.models.Cluster import Cluster
+from app.models.Deployment import Deployment
 
 async def create_cluster(db: AsyncSession, user_id: int, org_id: int, data):
     cluster = Cluster(
@@ -48,5 +49,8 @@ async def get_cluster_status(db: AsyncSession, current_user, cluster_id: int):
     return {"id": cluster.id, "name": cluster.name, "available_cpu": cluster.available_cpu, "available_ram": cluster.available_ram, "available_gpu": cluster.available_gpu}
 
 async def list_cluster_deployments(db: AsyncSession, current_user, cluster_id: int):
-    cluster = await get_cluster(db, current_user, cluster_id)
-    return cluster.deployments
+    cluster = await get_cluster(db, current_user, cluster_id) 
+    result = await db.execute(
+        select(Deployment).where(Deployment.cluster_id == cluster_id)
+    )
+    return result.scalars().all() 

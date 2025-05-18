@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from .base import Base
 from sqlalchemy.orm import relationship
-from app.models.Deployments import Deployment
+from app.models.Deployment import Deployment
 
 class User(Base):
     __tablename__ = "users"

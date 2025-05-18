@@ -7,7 +7,7 @@ import app.models.Organization
 import app.models.Role
 import app.models.UserOrganizations
 import app.models.Cluster
-import app.models.Deployments
+import app.models.Deployment
 
 from logging.config import fileConfig
 from alembic import context
