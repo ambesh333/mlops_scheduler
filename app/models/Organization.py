@@ -12,3 +12,4 @@ class Organization(Base):
     viewer_invite_code = Column(String, unique=True, nullable=False)
 
     members = relationship("UserOrganization", back_populates="organization")
+    clusters = relationship("Cluster", back_populates="organization", cascade="all, delete-orphan")

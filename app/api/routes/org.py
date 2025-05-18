@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.org import OrganizationCreate, JoinOrgRequest ,OrganizationRead
+from app.schemas.org import OrganizationCreate, JoinOrgRequest, OrganizationRead
 from app.core.database import AsyncSessionLocal
 from app.crud import org as crud_org
 from app.core.jwt import auth
@@ -23,3 +23,11 @@ async def create_organization(
 @router.post("/join")
 async def join_organization(request: JoinOrgRequest, db: AsyncSession = Depends(get_async_db), current_user=Depends(auth)):
     return await crud_org.join_organization(db, current_user.id, request.invite_code)
+
+@router.get("/all", response_model=list[OrganizationRead])
+async def get_all_organizations(db: AsyncSession = Depends(get_async_db)):
+    return await crud_org.get_all_organizations(db)
+
+@router.get("/my", response_model=list[OrganizationRead])
+async def get_my_organizations(db: AsyncSession = Depends(get_async_db), current_user=Depends(auth)):
+    return await crud_org.get_user_organizations(db, current_user.id)

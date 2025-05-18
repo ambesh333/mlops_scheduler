@@ -6,6 +6,8 @@ import app.models.user
 import app.models.Organization
 import app.models.Role
 import app.models.UserOrganizations
+import app.models.Cluster
+import app.models.Deployments
 
 from logging.config import fileConfig
 from alembic import context
