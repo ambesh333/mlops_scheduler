@@ -17,3 +17,4 @@ alembic upgrade head
 uvicorn app.main:app --reload
 
 docker exec -it mlops_postgres psql -U user -d mlops
+docker run --name redis-queue -p 6379:6379 -d redis
