@@ -75,6 +75,30 @@ Here is a UML diagram representing the database schema:
 
 ![Database Schema UML Diagram](https://www.mermaidchart.com/raw/7a7e0ef6-1f87-4691-9a72-2e0fd2b27480?theme=light&version=v0.1&format=svg)
 
+## Scheduling Algorithm
+
+The scheduling algorithm works as follows:
+
+*   **Filter out "impossible" jobs:** If a job asks for more resources than the system even has in total, it's skipped immediately.
+
+*   **Score the jobs:** Jobs are scored based on how resource-intensive they are, with GPU-heavy jobs being treated as more important than CPU or RAM-heavy ones (because GPUs are scarcer or more valuable).
+
+*   **Split jobs into two queues:**
+    *   High Priority Queue – Important jobs that can preempt lower ones if needed.
+    *   Low Priority Queue – Less important jobs that only run if there's leftover capacity.
+
+*   **Try to schedule High Priority jobs first:**
+    *   If there's space, they're added directly.
+    *   If there isn't, the algorithm checks whether it can pause one or more low-priority jobs to make space.
+
+*   **Then schedule Low Priority jobs:**
+    *   Only added if they fit without disrupting anything else.
+    *   They never cause preemption of other jobs.
+
+*   **Return two results:**
+    *   A list of jobs that are scheduled to run.
+    *   A list of low-priority jobs that were stopped (preempted) to make room for high-priority ones.
+
 ## API Endpoints
 
 Here is a list of the available API endpoints and their usage:
